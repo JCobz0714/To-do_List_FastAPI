@@ -1,7 +1,11 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from app.database import create_db_and_tables
+from app import models
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    create_db_and_tables()
+    yield
 
-@app.get("/")
-async def root():
-    return {"message": "Hola mundo"}
+app = FastAPI(lifespan=lifespan)
