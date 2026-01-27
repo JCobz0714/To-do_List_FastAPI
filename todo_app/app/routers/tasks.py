@@ -52,3 +52,13 @@ async def edit_tasks(task_id: int, new_task: TaskUpdate, session: Session = Depe
     session.refresh(db_task)
 
     return db_task
+
+@router.delete("/delete/{task_id}", status_code=204)
+async def delete_task(task_id: int, session: Session = Depends(get_session)):
+    db_task = session.get(Task, task_id)
+
+    if not db_task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    session.delete(db_task)
+    session.commit()
