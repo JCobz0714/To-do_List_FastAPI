@@ -12,6 +12,16 @@ async def get_tasks(session: Session = Depends(get_session)):
     tasks = session.exec(statement).all()
     return tasks
 
+@router.get("/{task_id}")
+async def get_task(task_id: int, session: Session = Depends(get_session)):
+    db_task = session.get(Task, task_id)
+
+    if not db_task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    return db_task;
+
+
 @router.post("/create/", status_code=201)
 async def create_tasks(task_data: TaskCreate, session: Session = Depends(get_session)):
     db_task = Task(**task_data.model_dump())
@@ -27,7 +37,7 @@ async def edit_tasks(task_id: int, new_task: TaskUpdate, session: Session = Depe
     db_task = session.get(Task, task_id)
 
     if not db_task:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="Task not found")
 
     if new_task.title is not None:
         db_task.title = new_task.title
