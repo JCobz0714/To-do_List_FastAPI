@@ -4,12 +4,12 @@ from app.database import get_session
 from app.models import Task, User
 from schemas.task import TaskCreate, TaskUpdate
 
-router = APIRouter(prefix="users/{user_id}/tasks", tags=["Tasks"])
+router = APIRouter(prefix="/users/{user_id}/tasks", tags=["Tasks"])
 
 @router.get("/")
 async def get_tasks(user_id: int, session: Session = Depends(get_session)):
     #Verifying if the user exists
-    validate_user_exists(user_id)
+    validate_user_exists(user_id, session)
 
     statement = select(Task).where(Task.user_id == user_id)
     tasks = session.exec(statement).all()
@@ -17,7 +17,7 @@ async def get_tasks(user_id: int, session: Session = Depends(get_session)):
 
 @router.get("/{task_id}")
 async def get_task(user_id: int, task_id: int, session: Session = Depends(get_session)):
-    validate_user_exists(user_id)
+    validate_user_exists(user_id, session)
 
     db_task = session.get(Task, task_id)
 
@@ -26,12 +26,11 @@ async def get_task(user_id: int, task_id: int, session: Session = Depends(get_se
     
     return db_task;
 
-
-@router.post("/create/", status_code=201)
+@router.post("/create", status_code=201)
 async def create_tasks(user_id: int, task_data: TaskCreate, session: Session = Depends(get_session)):
-    validate_user_exists(user_id)
+    validate_user_exists(user_id, session)
 
-    db_task = Task(**task_data.model_dump())
+    db_task = Task(**task_data.model_dump(), user_id=user_id)
 
     session.add(db_task)
     session.commit()
@@ -41,7 +40,7 @@ async def create_tasks(user_id: int, task_data: TaskCreate, session: Session = D
 
 @router.put("/{task_id}")
 async def edit_tasks(user_id: int, task_id: int, new_task: TaskUpdate, session: Session = Depends(get_session)):
-    validate_user_exists(user_id)
+    validate_user_exists(user_id, session)
 
     db_task = session.get(Task, task_id)
 
@@ -64,7 +63,7 @@ async def edit_tasks(user_id: int, task_id: int, new_task: TaskUpdate, session: 
 
 @router.delete("/{task_id}", status_code=204)
 async def delete_task(user_id: int, task_id: int, session: Session = Depends(get_session)):
-    validate_user_exists(user_id)
+    validate_user_exists(user_id, session)
 
     db_task = session.get(Task, task_id)
 
