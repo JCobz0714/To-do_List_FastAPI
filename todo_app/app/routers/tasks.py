@@ -53,7 +53,7 @@ async def edit_tasks(task_id: int, new_task: TaskUpdate, session: Session = Depe
 
     return db_task
 
-@router.delete("/delete/{task_id}", status_code=204)
+@router.delete("/{task_id}", status_code=204)
 async def delete_task(task_id: int, session: Session = Depends(get_session)):
     db_task = session.get(Task, task_id)
 

@@ -6,8 +6,15 @@ from schemas.user import UserCreate
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
+@router.get("")
+async def get_users(session: Session = Depends(get_session)):
+    statement = select(User)
+    users = session.exec(statement).all()
+
+    return users
+
 @router.get("/{user_id}")
-async def get_users(user_id: int, session: Session = Depends(get_session)):
+async def get_user(user_id: int, session: Session = Depends(get_session)):
     db_user = session.get(User, user_id)
 
     if not db_user:
